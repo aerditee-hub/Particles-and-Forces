@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Windows 11 - Dark Mode</title>
+<style>
+    /* =========================================================
+       WINDOWS 11 DARK THEME — design tokens
+    ========================================================= */
+    :root {
+        --accent: #60cdff;
+        --accent-dark: #0078d4;
+        --mica: rgba(32, 32, 32, 0.85);
+        --mica-dark: rgba(20, 20, 20, 0.92);
+        --text: #f3f3f3;
+        --text-soft: #ababab;
+        --stroke: rgba(255, 255, 255, 0.1);
+        --radius: 8px;
+        --taskbar-h: 48px;
+        --bg-wallpaper: radial-gradient(circle at 20% 15%, #2b1055 0%, transparent 45%),
+            radial-gradient(circle at 80% 10%, #000000 0%, transparent 50%),
+            radial-gradient(circle at 70% 80%, #1a1a40 0%, transparent 55%),
+            linear-gradient(160deg, #0f0c29 0%, #302b63 45%, #24243e 100%);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+        margin: 0; height: 100%; overflow: hidden;
+        font-family: "Segoe UI Variable", "Segoe UI", -apple-system, "Helvetica Neue", Arial, sans-serif;
+        user-select: none;
+        transition: filter 0.1s ease;
+        color: var(--text);
+    }
+
+    /* ---------------- DESKTOP / WALLPAPER ---------------- */
+    .desktop {
+        position: relative; width: 100vw; height: 100vh;
+        background: var(--bg-wallpaper);
+        overflow: hidden;
+        transition: background 0.4s ease;
+    }
+
+    .desktop-watermark {
+        position: absolute; bottom: calc(var(--taskbar-h) + 10px); right: 12px;
+        color: rgba(255,255,255,0.35); font-size: 11px; text-align: right;
+        pointer-events: none; line-height: 1.4; z-index: 1;
+    }
+
+    /* ---------------- DESKTOP ICONS ---------------- */
+    .icon-container {
+        position: absolute; top: 14px; left: 14px;
+        display: flex; flex-direction: column; gap: 4px; z-index: 5;
+    }
+    .icon {
+        width: 84px; padding: 6px 4px; border-radius: 4px;
+        display: flex; flex-direction: column; align-items: center; gap: 6px;
+        cursor: pointer;
+    }
+    .icon:hover { background: rgba(255,255,255,0.08); }
+    .icon-glyph {
+        width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+        font-size: 32px; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.5));
+    }
+    .icon-label {
+        color: #fff; font-size: 12px; text-align: center; line-height: 1.25;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.8); padding: 1px 4px; border-radius: 2px;
+    }
+
+    /* ---------------- WINDOWS ---------------- */
+    .windows-container { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
+    .window {
+        position: absolute; pointer-events: auto;
+        background: var(--mica); backdrop-filter: blur(40px) saturate(1.4);
+        -webkit-backdrop-filter: blur(40px) saturate(1.4);
+        border: 1px solid var(--stroke); border-radius: 10px;
+        box-shadow: 0 16px 48px rgba(0,0,0,0.5), 0 2px 6px rgba(0,0,0,0.3);
+        display: flex; flex-direction: column; overflow: hidden;
+        min-width: 360px; min-height: 240px;
+    }
+    .window.hidden { display: none !important; }
+    .window.maximized { top: 0 !important; left: 0 !important; width: 100vw !important; height: calc(100vh - var(--taskbar-h)) !important; border-radius: 0; }
+
+    .title-bar {
+        height: 40px; flex-shrink: 0; display: flex; align-items: center;
+        padding: 0 0 0 14px; -webkit-app-region: drag; background: rgba(45, 45, 45, 0.6);
+        border-bottom: 1px solid var(--stroke);
+    }
+    .title-bar.inactive { background: rgba(30, 30, 30, 0.4); opacity: 0.85; }
+    .title-bar-icon { font-size: 15px; margin-right: 8px; }
+    .title-bar-text { font-size: 12px; color: var(--text); font-weight: 400; flex: 1; pointer-events: none; }
+    .title-bar-controls { display: flex; height: 100%; }
+    .tb-btn {
+        width: 46px; height: 40px; border: none; background: transparent;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer; font-size: 13px; color: var(--text); font-family: inherit;
+    }
+    .tb-btn:hover { background: rgba(255,255,255,0.08); }
+    .tb-btn.close:hover { background: #e81123; color: #fff; }
+
+    /* ---------------- MICROSOFT EDGE TAB STYLING ---------------- */
+    .browser-tabs-bar {
+        display: flex;
+        align-items: center;
+        background: rgba(20, 20, 20, 0.6);
+        padding: 6px 8px 0 8px;
+        gap: 4px;
+        border-bottom: 1px solid var(--stroke);
+        overflow-x: auto;
+        flex-shrink: 0;
+    }
+    .browser-tab {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.04);
+        padding: 6px 12px;
+        border-radius: 8px 8px 0 0;
+        font-size: 12px;
+        color: var(--text-soft);
+        cursor: pointer;
+        border: 1px solid transparent;
+        border-bottom: none;
+        max-width: 160px;
+        min-width: 100px;
+        position: relative;
+    }
+    .browser-tab.active {
+        background: #1e1e1e;
+        color: var(--text);
+        border-color: var(--stroke);
+        box-shadow: 0 -1px 3px rgba(0,0,0,0.2);
+    }
+    .browser-tab-title {
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .browser-tab-close {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: none;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        cursor: pointer;
+        color: var(--text-soft);
+    }
+    .browser-tab-close:hover {
+        background: rgba(255,255,255,0.15);
+        color: var(--text);
+    }
+    .browser-new-tab-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        border: none;
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        cursor: pointer;
+        color: var(--text);
+    }
+    .browser-new-tab-btn:hover {
+        background: rgba(255,255,255,0.08);
+    }
+    .browser-view-panel {
+        display: none;
+        flex: 1;
+        position: relative;
+        background: #1e1e1e;
+    }
+    .browser-view-panel.active {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .window-body { flex: 1; display: flex; flex-direction: column; min-height: 0; background: rgba(30, 30, 30, 0.5); }
+    .toolbar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--stroke); flex-shrink: 0; }
+    .btn {
+        background: #2d2d2d; border: 1px solid var(--stroke); border-radius: 6px;
+        padding: 6px 14px; font-size: 12.5px; color: var(--text); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    .btn:hover { background: #3d3d3d; }
+    .btn.accent { background: var(--accent-dark); color: #fff; border-color: var(--accent-dark); }
+    .btn.accent:hover { background: #106ebe; }
+    .content-area { flex: 1; overflow-y: auto; padding: 16px; background: rgba(20,20,20,0.3); }
+    .path-bar { display: flex; align-items: center; gap: 6px; padding: 8px 12px; font-size: 12.5px; color: var(--text-soft); border-bottom: 1px solid var(--stroke); flex-shrink: 0; background: rgba(20,20,20,0.2); }
+
+    /* ---------------- FOLDER MEDIA GRID ---------------- */
+    .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
+    .media-item {
+        display: flex; flex-direction: column; gap: 8px; background: #252525;
+        border: 1px solid var(--stroke); border-radius: 8px; padding: 8px;
+        cursor: pointer; transition: box-shadow .12s, transform .12s;
+    }
+    .media-item:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.4); transform: translateY(-1px); background: #2d2d2d; }
+    .media-thumb-wrap {
+        position: relative; width: 100%; height: 100px; border-radius: 6px; overflow: hidden;
+        background: #10141c; display: flex; align-items: center; justify-content: center;
+    }
+    .media-thumb-wrap video { width: 100%; height: 100%; object-fit: cover; }
+    .play-badge { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); }
+    .play-badge::after { content: ""; width: 0; height: 0; border-left: 14px solid #fff; border-top: 9px solid transparent; border-bottom: 9px solid transparent; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8)); margin-left: 3px; }
+    .media-name { font-size: 12px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; font-weight: 500; }
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-soft); gap: 8px; text-align: center; }
+    .empty-state .glyph { font-size: 42px; opacity: 0.5; }
+    .empty-state .title { font-size: 14px; color: var(--text); }
+    .empty-state .hint { font-size: 12px; }
+
+    /* ---------------- FULL SCREEN SPLIT VIEW ---------------- */
+    .split-view { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; display: flex; background: #000; }
+    .split-view.hidden { display: none !important; }
+    .split-video-pane { width: 75%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; position: relative; }
+    .split-video-pane video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+    .split-back-btn { position: absolute; top: 20px; left: 20px; z-index: 5; background: rgba(32,32,32,0.8); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 8px 16px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; backdrop-filter: blur(10px); }
+    .split-back-btn:hover { background: rgba(50,50,50,0.95); }
+    .split-video-title { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.85); font-size: 14px; background: rgba(32,32,32,0.7); padding: 6px 16px; border-radius: 6px; backdrop-filter: blur(10px); max-width: 50%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .split-ai-pane { width: 25%; height: 100%; background: #1e1e1e; display: flex; align-items: center; justify-content: center; border-left: 1px solid #333; }
+    .split-ai-pane iframe { width: 100%; height: 100%; border: none; }
+
+    /* ---------------- APP SPECIFIC (CALC / CALENDAR) ---------------- */
+    .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .calc-btn { background: #2d2d2d; border: 1px solid var(--stroke); border-radius: 6px; padding: 14px 10px; font-size: 16px; color: var(--text); cursor: pointer; text-align: center; }
+    .calc-btn:hover { background: #3d3d3d; }
+    .calc-btn.op { background: #252525; font-weight: 600; }
+    .calc-btn.eq { background: var(--accent-dark); color: #fff; border-color: var(--accent-dark); font-weight: bold; }
+
+    /* ---------------- TASKBAR & TRAY ---------------- */
+    .taskbar {
+        position: absolute; bottom: 0; left: 0; width: 100%; height: var(--taskbar-h);
+        background: rgba(30, 30, 30, 0.85); backdrop-filter: blur(40px) saturate(1.5);
+        -webkit-backdrop-filter: blur(40px) saturate(1.5); border-top: 1px solid rgba(255,255,255,0.1);
+        display: flex; align-items: center; z-index: 9999; pointer-events: auto;
+    }
+    .taskbar-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 4px; height: 100%; }
+    .tb-icon-btn { width: 40px; height: 40px; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; font-size: 18px; }
+    .tb-icon-btn:hover { background: rgba(255,255,255,0.08); }
+    .tb-icon-btn.active { background: rgba(255,255,255,0.12); }
+    .tb-icon-btn.active::after { content: ""; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 5px; height: 3px; border-radius: 2px; background: var(--accent); }
+    .tb-icon-btn .win-logo-svg { width: 18px; height: 18px; }
+    .taskbar-right { position: absolute; right: 6px; display: flex; align-items: center; gap: 4px; height: 100%; }
+    .sys-tray { display: flex; align-items: center; gap: 10px; padding: 0 12px; height: 32px; border-radius: 4px; font-size: 12px; color: var(--text); cursor: pointer; transition: background 0.1s; }
+    .sys-tray:hover, .sys-tray.active { background: rgba(255,255,255,0.08); }
+    .sys-clock { text-align: right; line-height: 1.25; font-size: 12px; cursor: default; }
+
+    /* ---------------- TASKBAR PREVIEW TOOLTIP ---------------- */
+    .taskbar-preview {
+        position: absolute;
+        bottom: calc(var(--taskbar-h) + 8px);
+        background: var(--mica);
+        backdrop-filter: blur(20px) saturate(1.4);
+        -webkit-backdrop-filter: blur(20px) saturate(1.4);
+        border: 1px solid var(--stroke);
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        width: 190px;
+        height: 120px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        z-index: 100005;
+        pointer-events: auto;
+    }
+    .taskbar-preview.hidden { display: none !important; }
+    .tp-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 10px;
+        background: rgba(255,255,255,0.06);
+        border-bottom: 1px solid var(--stroke);
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--text);
+    }
+    .tp-close {
+        width: 18px;
+        height: 18px;
+        border: none;
+        background: transparent;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 12px;
+        color: var(--text);
+    }
+    .tp-close:hover { background: #e81123; color: #fff; }
+    .tp-body {
+        flex: 1;
+        background: rgba(255,255,255,0.03);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+        text-align: center;
+        color: var(--text-soft);
+        cursor: pointer;
+    }
+    .tp-body:hover { background: rgba(255,255,255,0.08); }
+
+    /* ---------------- START MENU ---------------- */
+    .start-menu {
+        position: absolute; bottom: calc(var(--taskbar-h) + 8px); left: 50%; transform: translateX(-50%);
+        width: 620px; max-width: 92vw; background: var(--mica);
+        backdrop-filter: blur(50px) saturate(1.5); border: 1px solid var(--stroke); border-radius: 10px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.6); padding: 24px; z-index: 10000;
+    }
+    .start-menu.hidden { display: none; }
+    input.start-search { width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 8px; background: #252525; border: 1px solid var(--stroke); border-radius: 6px; padding: 10px 12px; font-size: 13px; color: var(--text); margin-bottom: 22px; font-family: inherit; outline: none; }
+    input.start-search:focus { border-color: var(--accent); }
+    .start-section-label { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+    .start-pinned-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-bottom: 22px; }
+    .start-app { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 4px; border-radius: 6px; cursor: pointer; }
+    .start-app:hover { background: rgba(255,255,255,0.06); }
+    .start-app .glyph { font-size: 26px; }
+    .start-app .label { font-size: 11.5px; color: var(--text); text-align: center; }
+    .start-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--stroke); padding-top: 14px; margin-top: 4px; }
+    .start-user { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text); }
+    .start-user .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--accent-dark); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+
+    /* ---------------- QUICK SETTINGS ---------------- */
+    .quick-settings {
+        position: absolute; bottom: calc(var(--taskbar-h) + 12px); right: 12px;
+        width: 340px; background: var(--mica); backdrop-filter: blur(50px) saturate(1.5);
+        border: 1px solid var(--stroke); border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        padding: 20px; z-index: 10001; display: flex; flex-direction: column; gap: 16px;
+    }
+    .quick-settings.hidden { display: none; }
+    .qs-slider-row { display: flex; align-items: center; gap: 16px; }
+    .qs-slider-icon { font-size: 18px; width: 24px; text-align: center; opacity: 0.8; }
+    .qs-slider-row input[type=range] { flex: 1; -webkit-appearance: none; width: 100%; background: transparent; margin: 0; }
+    .qs-slider-row input[type=range]::-webkit-slider-runnable-track { height: 6px; background: rgba(255,255,255,0.15); border-radius: 3px; border: 1px solid rgba(0,0,0,0.4); }
+    .qs-slider-row input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; margin-top: -5px; box-shadow: 0 1px 3px rgba(0,0,0,0.5); border: 2px solid #222; }
+    
+    .qs-wallpapers-section { border-top: 1px solid var(--stroke); padding-top: 16px; }
+    .qs-section-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
+    .wp-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+    .wp-btn { width: 45px; height: 35px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: transform 0.1s, border-color 0.1s; }
+    .wp-btn:hover { transform: scale(1.05); border-color: var(--text); }
+</style>
+</head>
+<body>
+
+<div class="desktop" id="desktop">
+
+    <div class="desktop-watermark">Windows 11 Pro (Dark)<br>Build 26100</div>
+
+    <!-- DYNAMIC DESKTOP ICONS -->
+    <div class="icon-container" id="desktop-icons">
+        <div class="icon" ondblclick="appManager.open('edge')">
+            <div class="icon-glyph">🌐</div><div class="icon-label">Microsoft Bauaa</div>
+        </div>
+        <div class="icon" ondblclick="appManager.open('calculator')">
+            <div class="icon-glyph">🧮</div><div class="icon-label">Calculator</div>
+        </div>
+        <div class="icon" ondblclick="appManager.open('calendar')">
+            <div class="icon-glyph">📅</div><div class="icon-label">Calendar</div>
+        </div>
+    </div>
+
+    <!-- DYNAMIC WINDOWS -->
+    <div class="windows-container" id="windows-container">
+        <!-- WINDOW: MICROSOFT EDGE -->
+        <div class="window hidden" id="win-edge" style="top: 12%; left: 20%; width: 850px; height: 550px;">
+            <div class="title-bar">
+                <span class="title-bar-icon">🌐</span><div class="title-bar-text">Microsoft Bauaa</div>
+                <div class="title-bar-controls">
+                    <button class="tb-btn" onclick="appManager.minimize('edge')">&#8211;</button>
+                    <button class="tb-btn" onclick="appManager.toggleMax('edge')">&#9633;</button>
+                    <button class="tb-btn close" onclick="appManager.close('edge')">&times;</button>
+                </div>
+            </div>
+            
+            <!-- MULTI-TAB BAR -->
+            <div class="browser-tabs-bar" id="browser-tabs-bar"></div>
+
+            <div class="window-body">
+                <div class="toolbar" style="gap: 10px;">
+                    <input type="text" id="browser-url" placeholder="Search the web or enter a URL (Press Enter)" style="flex:1; padding:7px 10px; border-radius:6px; background:#252525; color:#f3f3f3; border:1px solid var(--stroke); font-family:inherit; font-size:13px; outline:none;" onkeydown="if(event.key==='Enter') navigateBrowser()">
+                    <button class="btn accent" onclick="navigateBrowser()">Go &rarr;</button>
+                </div>
+                <div class="content-area" id="browser-content-area" style="padding:0; display:flex; flex-direction:column; background:#1e1e1e; position: relative;">
+                    <!-- Dynamic Panels for Tabs Will Render Here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- WINDOW: CALCULATOR -->
+        <div class="window hidden" id="win-calculator" style="top: 20%; left: 30%; width: 320px; height: 420px; min-width: 250px; min-height: 350px;">
+            <div class="title-bar">
+                <span class="title-bar-icon">🧮</span><div class="title-bar-text">Calculator</div>
+                <div class="title-bar-controls">
+                    <button class="tb-btn" onclick="appManager.minimize('calculator')">&#8211;</button>
+                    <button class="tb-btn close" onclick="appManager.close('calculator')">&times;</button>
+                </div>
+            </div>
+            <div class="window-body" style="background:#202020; padding:16px;">
+                <div id="calc-display" style="font-size:36px; text-align:right; margin-bottom:16px; padding:12px; background:#181818; color:#fff; border-radius:8px; border:1px solid var(--stroke); min-height: 64px; overflow-x:auto;">0</div>
+                <div class="calc-grid">
+                    <button class="calc-btn op" onclick="calcPress('C')">C</button>
+                    <button class="calc-btn op" onclick="calcPress('(')">(</button>
+                    <button class="calc-btn op" onclick="calcPress(')')">)</button>
+                    <button class="calc-btn op" onclick="calcPress('/')">÷</button>
+                    <button class="calc-btn" onclick="calcPress('7')">7</button>
+                    <button class="calc-btn" onclick="calcPress('8')">8</button>
+                    <button class="calc-btn" onclick="calcPress('9')">9</button>
+                    <button class="calc-btn op" onclick="calcPress('*')">×</button>
+                    <button class="calc-btn" onclick="calcPress('4')">4</button>
+                    <button class="calc-btn" onclick="calcPress('5')">5</button>
+                    <button class="calc-btn" onclick="calcPress('6')">6</button>
+                    <button class="calc-btn op" onclick="calcPress('-')">−</button>
+                    <button class="calc-btn" onclick="calcPress('1')">1</button>
+                    <button class="calc-btn" onclick="calcPress('2')">2</button>
+                    <button class="calc-btn" onclick="calcPress('3')">3</button>
+                    <button class="calc-btn op" onclick="calcPress('+')">+</button>
+                    <button class="calc-btn" onclick="calcPress('0')" style="grid-column: span 2;">0</button>
+                    <button class="calc-btn" onclick="calcPress('.')">.</button>
+                    <button class="calc-btn eq" onclick="calcPress('=')">=</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- WINDOW: CALENDAR -->
+        <div class="window hidden" id="win-calendar" style="top: 15%; left: 35%; width: 360px; height: 380px;">
+            <div class="title-bar">
+                <span class="title-bar-icon">📅</span><div class="title-bar-text">Calendar</div>
+                <div class="title-bar-controls">
+                    <button class="tb-btn" onclick="appManager.minimize('calendar')">&#8211;</button>
+                    <button class="tb-btn close" onclick="appManager.close('calendar')">&times;</button>
+                </div>
+            </div>
+            <div class="window-body" style="padding: 20px; background: #202020; color: #fff;">
+                <h2 id="calendar-month-year" style="margin-top:0; font-size:18px; font-weight:600; text-align:center;"></h2>
+                <div style="display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; text-align:center; font-weight:600; font-size:12px; margin-bottom:12px; color:var(--text-soft);">
+                    <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+                </div>
+                <div id="calendar-days" style="display:grid; grid-template-columns:repeat(7, 1fr); gap:6px; text-align:center; font-size:13px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- START MENU -->
+    <div class="start-menu hidden" id="start-menu">
+        <input type="text" class="start-search" id="start-search-input" placeholder="🔍 Type here to search (Press Enter to search web)" onkeydown="handleStartSearch(event)">
+        <div class="start-section-label">Pinned</div>
+        
+        <div class="start-pinned-grid" id="start-pinned-apps">
+            <div class="start-app" onclick="appManager.open('edge'); toggleStart(false);"><div class="glyph">🌐</div><div class="label">Edge</div></div>
+            <div class="start-app" onclick="appManager.open('calculator'); toggleStart(false);"><div class="glyph">🧮</div><div class="label">Calculator</div></div>
+            <div class="start-app" onclick="appManager.open('calendar'); toggleStart(false);"><div class="glyph">📅</div><div class="label">Calendar</div></div>
+        </div>
+        
+        <div class="start-footer">
+            <div class="start-user"><div class="avatar">U</div>User</div>
+            <div style="font-size:16px; cursor:pointer;" title="Power" onclick="shutdownSystem()">⏻</div>
+        </div>
+    </div>
+
+    <!-- QUICK SETTINGS -->
+    <div class="quick-settings hidden" id="quick-settings">
+        <div class="qs-slider-row">
+            <div class="qs-slider-icon">☀️</div>
+            <input type="range" min="20" max="100" value="100" oninput="changeBrightness(this.value)" title="Brightness">
+        </div>
+        
+        <div class="qs-wallpapers-section">
+            <div class="qs-section-title">Background</div>
+            <div class="wp-grid">
+                <div class="wp-btn" style="background: linear-gradient(160deg, #0f0c29, #302b63);" onclick="setWallpaper('radial-gradient(circle at 20% 15%, #2b1055 0%, transparent 45%), radial-gradient(circle at 80% 10%, #000000 0%, transparent 50%), radial-gradient(circle at 70% 80%, #1a1a40 0%, transparent 55%), linear-gradient(160deg, #0f0c29 0%, #302b63 45%, #24243e 100%)')" title="Dark Purple"></div>
+                <div class="wp-btn" style="background: linear-gradient(160deg, #134e5e, #71b280);" onclick="setWallpaper('radial-gradient(circle at 30% 20%, #22577a 0%, transparent 50%), linear-gradient(160deg, #134e5e 0%, #2193b0 100%)')" title="Deep Teal"></div>
+                <div class="wp-btn" style="background: linear-gradient(160deg, #232526, #414345);" onclick="setWallpaper('linear-gradient(160deg, #232526 0%, #414345 100%)')" title="Carbon Gray"></div>
+                <div class="wp-btn" style="background: linear-gradient(160deg, #200122, #6f0000);" onclick="setWallpaper('linear-gradient(160deg, #200122 0%, #6f0000 100%)')" title="Crimson Night"></div>
+                <div class="wp-btn" style="background: #000000;" onclick="setWallpaper('#000000')" title="Solid Black"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TASKBAR -->
+    <div class="taskbar">
+        <div class="taskbar-center" id="taskbar-center">
+            <div class="tb-icon-btn" id="start-btn" onclick="toggleStart()" title="Start">
+                <svg class="win-logo-svg" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="0" y="0" width="40" height="40" fill="#00adef"/><rect x="48" y="0" width="40" height="40" fill="#00adef"/>
+                    <rect x="0" y="48" width="40" height="40" fill="#00adef"/><rect x="48" y="48" width="40" height="40" fill="#00adef"/>
+                </svg>
+            </div>
+            <div class="tb-icon-btn" id="taskbtn-edge" title="Microsoft Edge" onclick="handleTaskbarClick('edge', 'Microsoft Edge', '🌐', this, event)">🌐</div>
+            <div class="tb-icon-btn" id="taskbtn-calculator" title="Calculator" onclick="handleTaskbarClick('calculator', 'Calculator', '🧮', this, event)">🧮</div>
+            <div class="tb-icon-btn" id="taskbtn-calendar" title="Calendar" onclick="handleTaskbarClick('calendar', 'Calendar', '📅', this, event)">📅</div>
+        </div>
+        <div class="taskbar-right">
+            <div class="sys-tray" id="sys-tray-btn" onclick="toggleQuickSettings()" title="Quick Settings">Settings ⚙️</div>
+            <div class="sys-tray sys-clock" id="sys-clock">12:00<br>7/22/2026</div>
+        </div>
+    </div>
+
+    <!-- TASKBAR CLICK PREVIEW MINI WINDOW TOOLTIP -->
+    <div class="taskbar-preview hidden" id="taskbar-preview-tooltip"></div>
+
+</div>
+
+<!-- FULLSCREEN SPLIT VIEW OVERLAY -->
+<div class="split-view hidden" id="split-lectures"></div>
+
+<script>
+    /* =========================================================
+       ✨ CONFIGURATION SECTION ✨
+       ADD YOUR IMAGE LINK & FOLDERS HERE!
+    ========================================================= */
+    
+    // BROWSER START PAGE IMAGE URL:
+    const EDGE_START_IMAGE = "https://i.postimg.cc/SxL5kf1d/Screenshot-2026-08-06-124524-upscayl-4x-upscayl-standard-4x.png";
+
+    // CUSTOM FOLDERS AND VIDEOS:
+    const USER_FOLDERS = [
+        {
+            name: "Particles And Fields",
+            icon: "🗂️",
+            videos: [
+                { title: "W and Z Bosons", src: "Unlocking_Weak_Bosons.mp4" },
+                { title: "The Standard Model", src: "The_Standard_Model.mp4" },
+                { title: "Fermions", src: "The_Fermion.mp4" },
+                { title: "Photons", src: "Photon__Quantum_of_Light.mp4" },
+                { title: "Leptons", src: "Unlocking_the_Lepton.mp4" },
+                { title: "Higgs Bosons", src: "The_Higgs_Boson_Mystery.mp4" },
+            ]
+        },
+       
+    ];
+
+    /* =========================================================
+       SHUTDOWN LOGIC
+    ========================================================= */
+    function shutdownSystem() {
+        document.body.innerHTML = `
+            <div style="width: 100vw; height: 100vh; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; font-family: 'Segoe UI Variable', 'Segoe UI', sans-serif;">
+                <div style="pointer-events: none; margin-bottom: 24px;">
+                    <svg width="48" height="48" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0" y="0" width="40" height="40" fill="#00adef"/><rect x="48" y="0" width="40" height="40" fill="#00adef"/>
+                        <rect x="0" y="48" width="40" height="40" fill="#00adef"/><rect x="48" y="48" width="40" height="40" fill="#00adef"/>
+                    </svg>
+                </div>
+                <div style="font-size: 24px; font-weight: 300;">Shutting down</div>
+                <div style="margin-top: 24px; width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.15); border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            </div>
+            <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+        `;
+        
+        setTimeout(() => {
+            window.close();
+            window.history.back();
+            setTimeout(() => {
+                document.body.innerHTML = '';
+                document.body.style.backgroundColor = '#000';
+            }, 1000);
+        }, 2500);
+    }
+
+    /* =========================================================
+       MICROSOFT EDGE MULTI-TAB MANAGER (STATE-PRESERVED)
+    ========================================================= */
+    let edgeTabs = [];
+    let edgeTabCounter = 0;
+
+    function initEdgeBrowser() {
+        if (edgeTabs.length === 0) {
+            edgeAddTab('New Tab', '');
+        }
+    }
+
+    function edgeAddTab(title = 'New Tab', url = '') {
+        edgeTabCounter++;
+        const id = edgeTabCounter;
+        edgeTabs.push({ id, title, url });
+        renderEdgeTabs();
+        edgeSwitchTab(id);
+    }
+
+    function edgeCloseTab(id, event) {
+        if (event) event.stopPropagation();
+        const index = edgeTabs.findIndex(t => t.id === id);
+        if (index === -1) return;
+
+        edgeTabs.splice(index, 1);
+        const panel = document.getElementById(`browser-panel-${id}`);
+        if (panel) panel.remove();
+
+        if (edgeTabs.length === 0) {
+            appManager.close('edge');
+        } else {
+            const nextTab = edgeTabs[Math.max(0, index - 1)];
+            edgeSwitchTab(nextTab.id);
+        }
+        renderEdgeTabs();
+    }
+
+    function edgeSwitchTab(id) {
+        edgeTabs.forEach(t => t.active = (t.id === id));
+        renderEdgeTabs();
+
+        document.querySelectorAll('.browser-view-panel').forEach(p => p.classList.remove('active'));
+        let panel = document.getElementById(`browser-panel-${id}`);
+        const tabData = edgeTabs.find(t => t.id === id);
+
+        if (!panel) {
+            panel = document.createElement('div');
+            panel.className = 'browser-view-panel active';
+            panel.id = `browser-panel-${id}`;
+            panel.innerHTML = `
+                <div style="position:relative; width:100%; height:100%; display:flex; flex-direction:column; background: #1e1e1e;">
+                    <img class="browser-start-img" src="${EDGE_START_IMAGE}" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0; z-index:1; ${tabData.url ? 'display:none;' : ''}">
+                    
+                    <div class="browser-ntp-overlay" style="position:relative; z-index:2; width:100%; height:100%; display:${tabData.url ? 'none' : 'flex'}; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:90px; box-sizing:border-box;">
+                        <div style="font-size:36px; font-weight:600; color:#fff; text-shadow:0 2px 6px rgba(0,0,0,0.8); margin-bottom:24px;">Search the web</div>
+                        
+                        <div style="width: 520px; max-width: 90%; background: rgba(30, 30, 30, 0.85); backdrop-filter: blur(12px); border-radius: 28px; padding: 12px 24px; display: flex; align-items: center; gap: 14px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
+                            <span style="font-size:16px;">🔍</span>
+                            <input type="text" placeholder="Search with Google or enter address..." style="flex:1; border:none; background:transparent; font-size:14px; outline:none; font-family:inherit; color:#f3f3f3;" onkeydown="if(event.key==='Enter') { document.getElementById('browser-url').value=this.value; navigateBrowser(); }">
+                        </div>
+
+                        <div style="display:flex; gap:14px; margin-top:28px; flex-wrap:wrap; justify-content:center;">
+                            <div onclick="document.getElementById('browser-url').value='https://luna-4yrm.onrender.com/'; navigateBrowser();" style="background:rgba(40,40,40,0.85); backdrop-filter:blur(8px); padding:10px 18px; border-radius:14px; cursor:pointer; font-size:12.5px; font-weight:500; display:flex; align-items:center; gap:8px; box-shadow:0 4px 12px rgba(0,0,0,0.3); color:#f3f3f3; border:1px solid rgba(255,255,255,0.08); transition:transform 0.1s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">🌙 LUNA</div>
+                           
+                            <div onclick="document.getElementById('browser-url').value='https://aerditee-hub.github.io/Ta/'; navigateBrowser();" style="background:rgba(40,40,40,0.85); backdrop-filter:blur(8px); padding:10px 18px; border-radius:14px; cursor:pointer; font-size:12.5px; font-weight:500; display:flex; align-items:center; gap:8px; box-shadow:0 4px 12px rgba(0,0,0,0.3); color:#f3f3f3; border:1px solid rgba(255,255,255,0.08); transition:transform 0.1s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">🎸 VINE</div>
+                            <div onclick="document.getElementById('browser-url').value='https://wikipedia.org'; navigateBrowser();" style="background:rgba(40,40,40,0.85); backdrop-filter:blur(8px); padding:10px 18px; border-radius:14px; cursor:pointer; font-size:12.5px; font-weight:500; display:flex; align-items:center; gap:8px; box-shadow:0 4px 12px rgba(0,0,0,0.3); color:#f3f3f3; border:1px solid rgba(255,255,255,0.08); transition:transform 0.1s;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">📚 Wikipedia</div>
+                        </div>
+                    </div>
+
+                    <iframe class="browser-iframe" src="${tabData.url}" style="width:100%; height:100%; border:none; flex:1; position:relative; z-index:3; display:${tabData.url ? 'block' : 'none'};"></iframe>
+                </div>
+            `;
+            document.getElementById('browser-content-area').appendChild(panel);
+            
+            // Wire up iframe volume synchronization once loaded
+            const iframeEl = panel.querySelector('.browser-iframe');
+            iframeEl.onload = function() {
+                try {
+                    if (iframeEl.contentDocument) {
+                        iframeEl.contentDocument.querySelectorAll('video, audio').forEach(el => {
+                            if (!el.hasAttribute('muted')) el.volume = globalVolume;
+                        });
+                    }
+                } catch(e) {}
+            };
+        } else {
+            panel.classList.add('active');
+        }
+
+        document.getElementById('browser-url').value = tabData.url ? tabData.url : '';
+    }
+
+    function renderEdgeTabs() {
+        const bar = document.getElementById('browser-tabs-bar');
+        let html = '';
+        edgeTabs.forEach(t => {
+            html += `
+                <div class="browser-tab ${t.active ? 'active' : ''}" onclick="edgeSwitchTab(${t.id})">
+                    <span class="browser-tab-title">${t.title}</span>
+                    <button class="browser-tab-close" onclick="edgeCloseTab(${t.id}, event)">&times;</button>
+                </div>
+            `;
+        });
+        html += `<button class="browser-new-tab-btn" onclick="edgeAddTab()" title="New tab">+</button>`;
+        bar.innerHTML = html;
+    }
+
+    function navigateBrowser() {
+        const input = document.getElementById('browser-url').value.trim();
+        const activeTab = edgeTabs.find(t => t.active);
+        if (!activeTab) return;
+
+        if (!input) {
+            activeTab.url = '';
+            activeTab.title = 'New Tab';
+        } else {
+            let url = input;
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                if (url.includes('.') && !url.includes(' ')) url = 'https://' + url;
+                else url = 'https://www.bing.com/search?q=' + encodeURIComponent(url);
+            }
+            activeTab.url = url;
+            activeTab.title = input;
+        }
+
+        renderEdgeTabs();
+
+        let panel = document.getElementById(`browser-panel-${activeTab.id}`);
+        if (panel) {
+            const img = panel.querySelector('.browser-start-img');
+            const ntp = panel.querySelector('.browser-ntp-overlay');
+            const iframe = panel.querySelector('.browser-iframe');
+
+            if (!activeTab.url) {
+                if (img) img.style.display = 'block';
+                if (ntp) ntp.style.display = 'flex';
+                if (iframe) {
+                    iframe.style.display = 'none';
+                    iframe.src = '';
+                }
+            } else {
+                if (img) img.style.display = 'none';
+                if (ntp) ntp.style.display = 'none';
+                if (iframe) {
+                    iframe.style.display = 'block';
+                    iframe.src = activeTab.url;
+                }
+            }
+        }
+    }
+
+    /* =========================================================
+       APP / WINDOW MANAGER
+    ========================================================= */
+    let zIndexCounter = 10;
+    const AI_ASSISTANT_URL = 'https://dep-ai-ten.vercel.app/';
+
+    const apps = {
+        'edge':       { open: false, min: false },
+        'calculator': { open: false, min: false },
+        'calendar':   { open: false, min: false }
+    };
+
+    const appManager = {
+        open(id) {
+            apps[id].open = true; apps[id].min = false;
+            const win = document.getElementById('win-' + id);
+            if(win) win.classList.remove('hidden');
+            if(id === 'edge') initEdgeBrowser();
+            this.focus(id); this.syncTaskbar(id);
+            hideTaskbarPreview();
+        },
+        close(id) {
+            apps[id].open = false;
+            apps[id].min = false;
+            const win = document.getElementById('win-' + id);
+            if(win) {
+                win.classList.add('hidden');
+                
+                if (id === 'edge') {
+                    edgeTabs = [];
+                    edgeTabCounter = 0;
+                    document.getElementById('browser-tabs-bar').innerHTML = '';
+                    document.getElementById('browser-content-area').innerHTML = '';
+                } else if (id === 'calculator') {
+                    calcEvalStr = '';
+                    document.getElementById('calc-display').innerText = '0';
+                } else if (id.startsWith('folder_')) {
+                    win.querySelectorAll('video').forEach(video => {
+                        video.pause();
+                        video.currentTime = 0;
+                    });
+                }
+            }
+            this.syncTaskbar(id);
+            hideTaskbarPreview();
+        },
+        minimize(id) {
+            apps[id].min = true;
+            const win = document.getElementById('win-' + id);
+            if(win) win.classList.add('hidden');
+            this.syncTaskbar(id);
+            hideTaskbarPreview();
+        },
+        toggleMax(id) {
+            const win = document.getElementById('win-' + id);
+            if(win) win.classList.toggle('maximized');
+        },
+        syncTaskbar(id) {
+            const btn = document.getElementById('taskbtn-' + id);
+            if (!btn) return;
+            btn.classList.toggle('active', apps[id].open);
+        },
+        focus(id) {
+            zIndexCounter++;
+            const win = document.getElementById('win-' + id);
+            if(win) win.style.zIndex = zIndexCounter;
+            document.querySelectorAll('.title-bar').forEach(tb => tb.classList.add('inactive'));
+            const titleBar = document.querySelector(`#win-${id} .title-bar`);
+            if (titleBar) titleBar.classList.remove('inactive');
+            document.querySelectorAll('.tb-icon-btn').forEach(b => b.classList.remove('active'));
+            this.syncTaskbar(id);
+        }
+    };
+
+    /* =========================================================
+       DYNAMIC FOLDER GENERATOR
+    ========================================================= */
+    function initializeFileSystem() {
+        const desktopContainer = document.getElementById('desktop-icons');
+        const windowsContainer = document.getElementById('windows-container');
+        const taskbarContainer = document.getElementById('taskbar-center');
+        const startMenuContainer = document.getElementById('start-pinned-apps');
+
+        USER_FOLDERS.forEach((folder, index) => {
+            const appId = 'folder_' + index;
+            
+            apps[appId] = { open: false, min: false };
+
+            const desktopIcon = document.createElement('div');
+            desktopIcon.className = 'icon';
+            desktopIcon.innerHTML = `<div class="icon-glyph">${folder.icon}</div><div class="icon-label">${folder.name}</div>`;
+            desktopIcon.ondblclick = () => appManager.open(appId);
+            desktopContainer.insertBefore(desktopIcon, desktopContainer.firstChild);
+
+            let videosHtml = '';
+            if (folder.videos.length === 0) {
+                videosHtml = `<div class="empty-state"><div class="glyph">🎬</div><div class="title">Folder is empty</div><div class="hint">Add videos in the USER_FOLDERS config.</div></div>`;
+            } else {
+                videosHtml = `<div class="media-grid">`;
+                folder.videos.forEach(vid => {
+                    videosHtml += `
+                        <div class="media-item" ondblclick="openSplitView('${vid.title.replace(/'/g, "\\'")}', '${vid.src}')">
+                            <div class="media-thumb-wrap">
+                                <video src="${vid.src}" preload="metadata" muted></video>
+                                <div class="play-badge"></div>
+                            </div>
+                            <div class="media-name" title="${vid.title}">${vid.title}</div>
+                        </div>`;
+                });
+                videosHtml += `</div>`;
+            }
+
+            const winEl = document.createElement('div');
+            winEl.className = 'window hidden';
+            winEl.id = `win-${appId}`;
+            winEl.style = `top: ${8 + (index*3)}%; left: ${12 + (index*4)}%; width: 720px; height: 480px;`;
+            winEl.innerHTML = `
+                <div class="title-bar">
+                    <span class="title-bar-icon">${folder.icon}</span>
+                    <div class="title-bar-text">${folder.name}</div>
+                    <div class="title-bar-controls">
+                        <button class="tb-btn" onclick="appManager.minimize('${appId}')">&#8211;</button>
+                        <button class="tb-btn" onclick="appManager.toggleMax('${appId}')">&#9633;</button>
+                        <button class="tb-btn close" onclick="appManager.close('${appId}')">&times;</button>
+                    </div>
+                </div>
+                <div class="path-bar">📁 <span class="seg">This PC</span> <span class="chev">›</span> <span class="seg">Desktop</span> <span class="chev">›</span> <span class="seg">${folder.name}</span></div>
+                <div class="window-body">
+                    <div class="toolbar"><span style="font-size:12px;color:var(--text-soft);">${folder.videos.length} item(s)</span></div>
+                    <div class="content-area">${videosHtml}</div>
+                </div>
+            `;
+            windowsContainer.appendChild(winEl);
+
+            const startApp = document.createElement('div');
+            startApp.className = 'start-app';
+            startApp.innerHTML = `<div class="glyph">${folder.icon}</div><div class="label">${folder.name}</div>`;
+            startApp.onclick = () => { appManager.open(appId); toggleStart(false); };
+            startMenuContainer.insertBefore(startApp, startMenuContainer.firstChild);
+
+            const taskBtn = document.createElement('div');
+            taskBtn.className = 'tb-icon-btn';
+            taskBtn.id = `taskbtn-${appId}`;
+            taskBtn.title = folder.name;
+            taskBtn.innerText = folder.icon;
+            taskBtn.onclick = (e) => handleTaskbarClick(appId, folder.name, folder.icon, taskBtn, e);
+            taskbarContainer.insertBefore(taskBtn, taskbarContainer.children[1]);
+        });
+    }
+
+    initializeFileSystem();
+
+    /* =========================================================
+       TASKBAR CLICK PREVIEW (MINI WINDOW & CLOSE) LOGIC
+    ========================================================= */
+    const previewEl = document.getElementById('taskbar-preview-tooltip');
+    let currentPreviewAppId = null;
+
+    function handleTaskbarClick(id, title, icon, btnEl, event) {
+        event.stopPropagation();
+        if (!apps[id].open) {
+            appManager.open(id);
+            return;
+        }
+
+        if (currentPreviewAppId === id && !previewEl.classList.contains('hidden')) {
+            hideTaskbarPreview();
+        } else {
+            showTaskbarPreview(id, title, icon, btnEl);
+            currentPreviewAppId = id;
+        }
+    }
+
+    function showTaskbarPreview(id, title, icon, btnEl) {
+        if (!apps[id] || !apps[id].open) return;
+        const rect = btnEl.getBoundingClientRect();
+        
+        previewEl.innerHTML = `
+            <div class="tp-header">
+                <span style="display:flex;align-items:center;gap:6px;"><span style="font-size:13px;">${icon}</span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;">${title}</span></span>
+                <button class="tp-close" title="Close" onclick="event.stopPropagation(); appManager.close('${id}'); hideTaskbarPreview();">&times;</button>
+            </div>
+            <div class="tp-body" onclick="appManager.open('${id}'); hideTaskbarPreview();">
+                <div style="font-size:26px;margin-bottom:4px;">${icon}</div>
+                <div style="font-size:11px;font-weight:600;color:var(--text);">${title}</div>
+                <div style="font-size:10px;opacity:0.7;">Click to Open Window</div>
+            </div>
+        `;
+        
+        const previewWidth = 190;
+        let leftPos = rect.left + (rect.width / 2) - (previewWidth / 2);
+        if (leftPos < 10) leftPos = 10;
+        if (leftPos + previewWidth > window.innerWidth - 10) leftPos = window.innerWidth - previewWidth - 10;
+
+        previewEl.style.left = leftPos + 'px';
+        previewEl.classList.remove('hidden');
+    }
+
+    function hideTaskbarPreview() {
+        previewEl.classList.add('hidden');
+        currentPreviewAppId = null;
+    }
+
+    document.addEventListener('mousedown', (e) => {
+        const preview = document.getElementById('taskbar-preview-tooltip');
+        if (!preview.classList.contains('hidden') && !preview.contains(e.target) && !e.target.closest('.tb-icon-btn')) {
+            hideTaskbarPreview();
+        }
+    });
+
+    /* =========================================================
+       GLOBAL WINDOW EVENT DELEGATION
+    ========================================================= */
+    document.addEventListener('mousedown', (e) => {
+        const win = e.target.closest('.window');
+        if (win && !e.target.closest('.tb-btn')) {
+            const id = win.id.replace('win-', '');
+            if (apps[id]) appManager.focus(id);
+        }
+    });
+
+    let isDragging = false, dragTarget = null, startX, startY, initLeft, initTop;
+    
+    document.addEventListener('mousedown', (e) => {
+        const titleBar = e.target.closest('.title-bar');
+        if (titleBar && !e.target.closest('.tb-btn')) {
+            const win = titleBar.parentElement;
+            if (win.classList.contains('maximized')) return;
+            isDragging = true;
+            dragTarget = win;
+            startX = e.clientX; startY = e.clientY;
+            initLeft = dragTarget.offsetLeft; initTop = dragTarget.offsetTop;
+        }
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging || !dragTarget) return;
+        let newLeft = initLeft + (e.clientX - startX);
+        let newTop = initTop + (e.clientY - startY);
+
+        const rect = dragTarget.getBoundingClientRect();
+        const minLeft = -rect.width + 60;
+        const maxLeft = window.innerWidth - 60;
+        const minTop = 0;
+        const maxTop = window.innerHeight - 48 - 30;
+
+        newLeft = Math.max(minLeft, Math.min(maxLeft, newLeft));
+        newTop = Math.max(minTop, Math.min(maxTop, newTop));
+
+        dragTarget.style.left = newLeft + 'px';
+        dragTarget.style.top = newTop + 'px';
+    });
+    
+    document.addEventListener('mouseup', () => { isDragging = false; dragTarget = null; });
+
+
+    /* =========================================================
+       SYSTEM UI TOGGLES
+    ========================================================= */
+    function toggleStart(force) {
+        const menu = document.getElementById('start-menu');
+        const show = force !== undefined ? force : menu.classList.contains('hidden');
+        menu.classList.toggle('hidden', !show);
+        document.getElementById('start-btn').classList.toggle('active', show);
+        if(show) { toggleQuickSettings(false); hideTaskbarPreview(); document.getElementById('start-search-input').focus(); }
+    }
+
+    function toggleQuickSettings(force) {
+        const qs = document.getElementById('quick-settings');
+        const show = force !== undefined ? force : qs.classList.contains('hidden');
+        qs.classList.toggle('hidden', !show);
+        document.getElementById('sys-tray-btn').classList.toggle('active', show);
+        if(show) { toggleStart(false); hideTaskbarPreview(); }
+    }
+
+    document.addEventListener('mousedown', (e) => {
+        const startMenu = document.getElementById('start-menu'), startBtn = document.getElementById('start-btn');
+        if (!startMenu.classList.contains('hidden') && !startMenu.contains(e.target) && !startBtn.contains(e.target)) toggleStart(false);
+
+        const qsMenu = document.getElementById('quick-settings'), qsBtn = document.getElementById('sys-tray-btn');
+        if (!qsMenu.classList.contains('hidden') && !qsMenu.contains(e.target) && !qsBtn.contains(e.target)) toggleQuickSettings(false);
+    });
+
+    function handleStartSearch(e) {
+        if (e.key === 'Enter') {
+            const query = e.target.value.trim();
+            if (query) {
+                toggleStart(false); appManager.open('edge');
+                edgeAddTab(query, 'https://www.bing.com/search?q=' + encodeURIComponent(query));
+                e.target.value = '';
+            }
+        }
+    }
+
+    /* =========================================================
+       QUICK SETTINGS & VOLUME CONTROLLER FIX
+    ========================================================= */
+    function changeBrightness(value) { document.body.style.filter = `brightness(${value}%)`; }
+    
+    let globalVolume = 1.0; 
+    function changeVolume(value) {
+        globalVolume = value / 100;
+        
+        // 1. Update main document video & audio elements
+        document.querySelectorAll('video, audio').forEach(el => { 
+            if (!el.hasAttribute('muted')) el.volume = globalVolume; 
+        });
+
+        // 2. Update media elements inside active iframes (same-origin support)
+        document.querySelectorAll('iframe').forEach(iframe => {
+            try {
+                if (iframe.contentDocument) {
+                    iframe.contentDocument.querySelectorAll('video, audio').forEach(el => {
+                        if (!el.hasAttribute('muted')) el.volume = globalVolume;
+                    });
+                }
+            } catch (e) {
+                // Cross-origin iframe security policy restriction fallback
+            }
+        });
+    }
+
+    function setWallpaper(bg) { document.documentElement.style.setProperty('--bg-wallpaper', bg); }
+
+    /* =========================================================
+       CALCULATOR LOGIC
+    ========================================================= */
+    let calcEvalStr = '';
+    function calcPress(val) {
+        const disp = document.getElementById('calc-display');
+        if (val === 'C') { calcEvalStr = ''; disp.innerText = '0'; } 
+        else if (val === '=') { 
+            try { 
+                let result = eval(calcEvalStr.replace(/×/g, '*').replace(/÷/g, '/'));
+                if(result % 1 !== 0) result = result.toFixed(4);
+                calcEvalStr = result.toString(); disp.innerText = calcEvalStr; 
+            } catch(e) { disp.innerText = 'Error'; calcEvalStr = ''; } 
+        } else { 
+            calcEvalStr += val; disp.innerText = calcEvalStr.replace(/\*/g, '×').replace(/\//g, '÷'); 
+        }
+    }
+
+    /* =========================================================
+       CALENDAR LOGIC
+    ========================================================= */
+    function renderCalendar() {
+        const now = new Date(); const year = now.getFullYear(); const month = now.getMonth();
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        document.getElementById('calendar-month-year').innerText = `${monthNames[month]} ${year}`;
+        const firstDay = new Date(year, month, 1).getDay(); const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const grid = document.getElementById('calendar-days'); grid.innerHTML = '';
+        for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div></div>`;
+        for (let d = 1; d <= daysInMonth; d++) {
+            const isToday = (d === now.getDate());
+            const style = isToday ? 'background:var(--accent-dark); color:#fff; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; margin:auto;' : 'width:30px; height:30px; display:flex; align-items:center; justify-content:center; margin:auto;';
+            grid.innerHTML += `<div style="${style}">${d}</div>`;
+        }
+    }
+    renderCalendar();
+
+    /* =========================================================
+       SPLIT VIDEO VIEW
+    ========================================================= */
+    function openSplitView(name, url) {
+        const split = document.getElementById('split-lectures');
+        split.classList.remove('hidden');
+        split.innerHTML = `
+            <div class="split-video-pane">
+                <button class="split-back-btn" onclick="closeSplitView()">&larr; Back to Folder</button>
+                <div class="split-video-title">${name}</div>
+                <video id="fullscreen-video" src="${url}" controls autoplay></video>
+            </div>
+            <div class="split-ai-pane">
+                <iframe src="${AI_ASSISTANT_URL}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+            </div>
+        `;
+        document.getElementById('fullscreen-video').volume = globalVolume;
+    }
+    function closeSplitView() {
+        const split = document.getElementById('split-lectures');
+        split.classList.add('hidden'); split.innerHTML = '';
+    }
+
+    /* =========================================================
+       CLOCK
+    ========================================================= */
+    function updateClock() {
+        const now = new Date();
+        let h = now.getHours(), m = now.getMinutes(); const ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12; m = m < 10 ? '0' + m : m;
+        const dateStr = (now.getMonth()+1) + '/' + now.getDate() + '/' + now.getFullYear();
+        document.getElementById('sys-clock').innerHTML = `${h}:${m} ${ampm}<br>${dateStr}`;
+    }
+    setInterval(updateClock, 1000); updateClock();
+</script>
+</body>
+</html>
