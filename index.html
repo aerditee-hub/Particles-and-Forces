@@ -520,7 +520,7 @@
     ========================================================= */
     
     // BROWSER START PAGE IMAGE URL:
-    const EDGE_START_IMAGE = "https://i.postimg.cc/SxL5kf1d/Screenshot-2026-08-06-124524-upscayl-4x-upscayl-standard-4x.png";
+    const EDGE_START_IMAGE = "background.png";
 
     // CUSTOM FOLDERS AND VIDEOS:
     const USER_FOLDERS = [
@@ -542,6 +542,9 @@
     /* =========================================================
        SHUTDOWN LOGIC
     ========================================================= */
+    // Paste the destination URL between the quotes below (e.g. "https://your-game-site.com/level2")
+    const SHUTDOWN_REDIRECT_URL = "https://aerditee-hub.github.io/Physics/";
+
     function shutdownSystem() {
         document.body.innerHTML = `
             <div style="width: 100vw; height: 100vh; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; font-family: 'Segoe UI Variable', 'Segoe UI', sans-serif;">
@@ -558,12 +561,11 @@
         `;
         
         setTimeout(() => {
-            window.close();
-            window.history.back();
-            setTimeout(() => {
-                document.body.innerHTML = '';
-                document.body.style.backgroundColor = '#000';
-            }, 1000);
+            if (SHUTDOWN_REDIRECT_URL) {
+                window.location.href = SHUTDOWN_REDIRECT_URL;
+            } else {
+                console.warn('SHUTDOWN_REDIRECT_URL is empty — set it near the top of the shutdown logic.');
+            }
         }, 2500);
     }
 
@@ -687,7 +689,7 @@
             let url = input;
             if (!url.startsWith('http://') && !url.startsWith('https://')) {
                 if (url.includes('.') && !url.includes(' ')) url = 'https://' + url;
-                else url = 'https://www.bing.com/search?q=' + encodeURIComponent(url);
+                else url = 'https://www.google.com/search?igu=1&q=' + encodeURIComponent(url);
             }
             activeTab.url = url;
             activeTab.title = input;
@@ -1007,7 +1009,7 @@
             const query = e.target.value.trim();
             if (query) {
                 toggleStart(false); appManager.open('edge');
-                edgeAddTab(query, 'https://www.bing.com/search?q=' + encodeURIComponent(query));
+                edgeAddTab(query, 'https://www.google.com/search?igu=1&q=' + encodeURIComponent(query));
                 e.target.value = '';
             }
         }
